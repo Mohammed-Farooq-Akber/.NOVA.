@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Events Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .event-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .event-tech { border-left-color: #3B82F6; }
+        .event-cultural { border-left-color: #EC4899; }
+        .event-sports { border-left-color: #10B981; }
+        .event-academic { border-left-color: #F59E0B; }
+        .event-other { border-left-color: #8B5CF6; }
+        
+        .nav-link.active {
+            border-bottom: 2px solid #3B82F6;
+            color: #3B82F6;
+        }
+        
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-preview {
+            max-height: 200px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img src="https://placehold.co/40x40" alt="College Events Hub logo with multiple colored event markers" class="h-8 w-8 rounded-full" />
+                        <span class="ml-2 text-xl font-semibold text-gray-900">College Events Hub</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="nav-link active px-3 pt-1 pb-3 text-sm font-medium">Home</a>
+                        <a href="#" class="nav-link px-3 pt-1 pb-3 text-sm font-medium text-gray-500 hover:text-gray-700">About</a>
+                        <a href="#" class="nav-link px-3 pt-1 pb-3 text-sm font-medium text-gray-500 hover:text-gray-700">Contact</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <button id="addEventBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Add Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-blue-700">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                    Discover Upcoming College Events
+                </h1>
+                <p class="mt-3 max-w-md mx-auto text-base text-blue-100 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    Find and participate in all the exciting events happening across campus. Brought to you by student clubs and organizations.
+                </p>
+                <div class="mt-5 sm:mt-8 sm:flex sm:justify-center">
+                    <div class="rounded-md shadow">
+                        <a href="#events" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                            View Events
+                        </a>
+                    </div>
+                    <div class="mt-3 sm:mt-0 sm:ml-3">
+                        <button id="heroAddEventBtn" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-500 bg-opacity-60 hover:bg-opacity-70 md:py-4 md:text-lg md:px-10">
+                            Add Your Event
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Event Filters -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <h2 id="events" class="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Upcoming Events</h2>
+                <div class="flex space-x-2 overflow-x-auto pb-2 w-full sm:w-auto">
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800" data-category="all">All</button>
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-blue-50 text-blue-600" data-category="tech">Tech</button>
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-pink-50 text-pink-600" data-category="cultural">Cultural</button>
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-green-50 text-green-600" data-category="sports">Sports</button>
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-yellow-50 text-yellow-600" data-category="academic">Academic</button>
+                    <button class="category-filter px-4 py-2 rounded-full text-sm font-medium bg-purple-50 text-purple-600" data-category="other">Other</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div id="eventsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Events will be dynamically loaded here -->
+        </div>
+
+        <!-- No Events Message -->
+        <div id="noEventsMessage" class="text-center py-12 hidden">
+            <img src="https://placehold.co/300x200" alt="Empty calendar with question mark indicating no events scheduled" class="mx-auto mb-4" />
+            <h3 class="text-xl font-medium text-gray-900">No upcoming events</h3>
+            <p class="mt-2 text-gray-500">Check back later or add your own event!</p>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="eventModal" class="fixed z-10 inset-0 overflow-y-auto modal hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Add New Event
+                        </h3>
+                        <div class="mt-2">
+                            <form id="eventForm" class="space-y-4">
+                                <div>
+                                    <label for="eventName" class="block text-sm font-medium text-gray-700">Event Name</label>
+                                    <input type="text" id="eventName" name="eventName" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="clubName" class="block text-sm font-medium text-gray-700">Organizing Club</label>
+                                    <input type="text" id="clubName" name="clubName" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="eventDate" class="block text-sm font-medium text-gray-700">Event Date & Time</label>
+                                    <input type="datetime-local" id="eventDate" name="eventDate" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="eventLocation" class="block text-sm font-medium text-gray-700">Location</label>
+                                    <input type="text" id="eventLocation" name="eventLocation" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="eventCategory" class="block text-sm font-medium text-gray-700">Category</label>
+                                    <select id="eventCategory" name="eventCategory" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md" required>
+                                        <option value="tech">Tech</option>
+                                        <option value="cultural">Cultural</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="academic">Academic</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="eventDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea id="eventDescription" name="eventDescription" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label for="eventImage" class="block text-sm font-medium text-gray-700">Event Image</label>
+                                    <div class="file-input-wrapper mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                        <div class="space-y-1 text-center">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <div class="flex text-sm text-gray-600">
+                                                <label for="eventImage" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                                    <span>Upload a file</span>
+                                                    <input id="eventImage" name="eventImage" type="file" class="sr-only" accept="image/*">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">
+                                                PNG, JPG up to 2MB
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div id="imagePreviewContainer" class="hidden">
+                                        <img id="imagePreview" class="file-preview" src="#" alt="Preview of uploaded event image" />
+                                        <button type="button" id="removeImageBtn" class="mt-2 text-sm text-red-600 hover:text-red-800">Remove image</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <input id="isRegistrationRequired" name="isRegistrationRequired" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                    <label for="isRegistrationRequired" class="ml-2 block text-sm text-gray-700">
+                                        Require registration
+                                    </label>
+                                </div>
+                                
+                                <div id="registrationDetails" class="hidden">
+                                    <label for="registrationLink" class="block text-sm font-medium text-gray-700">Registration Link</label>
+                                    <input type="url" id="registrationLink" name="registrationLink" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="https://example.com/register">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="submitEventBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Submit Event
+                    </button>
+                    <button type="button" id="cancelEventBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6">
+                <div>
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Event Submitted Successfully</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">Your event has been added to the college events hub. Students will now be able to see and register for your event.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5 sm:mt-6">
+                    <button type="button" id="successModalClose" class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const addEventBtn = document.getElementById('addEventBtn');
+        const heroAddEventBtn = document.getElementById('heroAddEventBtn');
+        const eventModal = document.getElementById('eventModal');
+        const cancelEventBtn = document.getElementById('cancelEventBtn');
+        const eventForm = document.getElementById('eventForm');
+        const submitEventBtn = document.getElementById('submitEventBtn');
+        const successModal = document.getElementById('successModal');
+        const successModalClose = document.getElementById('successModalClose');
+        const eventsContainer = document.getElementById('eventsContainer');
+        const noEventsMessage = document.getElementById('noEventsMessage');
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        const isRegistrationRequired = document.getElementById('isRegistrationRequired');
+        const registrationDetails = document.getElementById('registrationDetails');
+        const eventImage = document.getElementById('eventImage');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Modal Controls
+            addEventBtn.addEventListener('click', () => showModal(eventModal));
+            heroAddEventBtn.addEventListener('click', () => showModal(eventModal));
+            cancelEventBtn.addEventListener('click', () => hideModal(eventModal));
+            successModalClose.addEventListener('click', () => hideModal(successModal));
+            
+            // Form Controls
+            isRegistrationRequired.addEventListener('change', toggleRegistrationDetails);
+            eventImage.addEventListener('change', handleImageUpload);
+            removeImageBtn.addEventListener('click', handleRemoveImage);
+            submitEventBtn.addEventListener('click', submitEvent);
+            
+            // Category Filters
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', () => filterEvents(filter.dataset.category));
+            });
+        }
+
+        // Modal Functions
+        function showModal(modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideModal(modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            if (modal === eventModal) {
+                eventForm.reset();
+                imagePreviewContainer.classList.add('hidden');
+                registrationDetails.classList.add('hidden');
+            }
+        }
+
+        // Form Functions
+        function toggleRegistrationDetails() {
+            if (isRegistrationRequired.checked) {
+                registrationDetails.classList.remove('hidden');
+                registrationLink.required = true;
+            } else {
+                registrationDetails.classList.add('hidden');
+                registrationLink.required = false;
+                registrationLink.value = '';
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size exceeds 2MB limit');
+                    event.target.value = '';
+                    return;
+                }
+                
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file (JPEG, PNG)');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleRemoveImage() {
+            eventImage.value = '';
+            imagePreview.src = '#';
+            imagePreviewContainer.classList.add('hidden');
+        }
+
+        // Event Submission
+        function submitEvent() {
+            if (!eventForm.checkValidity()) {
+                eventForm.reportValidity();
+                return;
+            }
+            
+            const eventData = {
+                id: Date.now(),
+                name: eventName.value,
+                club: clubName.value,
+                date: eventDate.value,
+                location: eventLocation.value,
+                category: eventCategory.value,
+                description: eventDescription.value,
+                registrationRequired: isRegistrationRequired.checked,
+                registrationLink: isRegistrationRequired.checked ? registrationLink.value : null,
+                image: imagePreview.src !== '#' ? imagePreview.src : null,
+                createdAt: new Date().toISOString()
+            };
+            
+            saveEvent(eventData);
+            hideModal(eventModal);
+            showModal(successModal);
+            loadEvents();
+        }
+
+        // Event Storage
+        function saveEvent(event) {
+            const events = JSON.parse(localStorage.getItem('collegeEvents') || '[]');
+            events.push(event);
+            localStorage.setItem('collegeEvents', JSON.stringify(events));
+        }
+
+        function getEvents() {
+            return JSON.parse(localStorage.getItem('collegeEvents') || '[]');
+        }
+
+        // Event Display
+        function loadEvents(filterCategory = 'all') {
+            const events = getEvents().sort((a, b) => new Date(a.date) - new Date(b.date));
+            const filteredEvents = filterCategory === 'all' 
+                ? events 
+                : events.filter(event => event.category === filterCategory);
+            
+            renderEvents(filteredEvents);
+        }
+
+        function filterEvents(category) {
+            // Update active filter button
+            categoryFilters.forEach(filter => {
+                if (filter.dataset.category === category) {
+                    const colorMap = {
+                        'all': 'bg-blue-100 text-blue-800',
+                        'tech': 'bg-blue-100 text-blue-800',
+                        'cultural': 'bg-pink-100 text-pink-800',
+                        'sports': 'bg-green-100 text-green-800',
+                        'academic': 'bg-yellow-100 text-yellow-800',
+                        'other': 'bg-purple-100 text-purple-800'
+                    };
+                    
+                    // Remove all existing color classes
+                    filter.classList.remove(...Object.values(colorMap).flatMap(value => value.split(' ')));
+                    
+                    // Add the appropriate color classes
+                    const colorClasses = colorMap[category].split(' ');
+                    filter.classList.add(...colorClasses);
+                } else {
+                    // Reset other buttons
+                    const baseClasses = ['px-4', 'py-2', 'rounded-full', 'text-sm', 'font-medium', 'bg-blue-50', 'text-blue-600'];
+                    filter.classList.remove(...baseClasses);
+                    filter.classList.add(...['px-4', 'py-2', 'rounded-full', 'text-sm', 'font-medium'],
+                        category === 'tech' ? 'bg-blue-50 text-blue-600' :
+                        category === 'cultural' ? 'bg-pink-50 text-pink-600' :
+                        category === 'sports' ? 'bg-green-50 text-green-600' :
+                        category === 'academic' ? 'bg-yellow-50 text-yellow-600' :
+                                                   'bg-purple-50 text-purple-600');
+                }
+            });
+            
+            loadEvents(category);
+        }
+
+        function renderEvents(events) {
+            eventsContainer.innerHTML = '';
+            
+            if (events.length === 0) {
+                noEventsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noEventsMessage.classList.add('hidden');
+            
+            events.forEach(event => {
+                const eventDate = new Date(event.date);
+                const eventElement = document.createElement('div');
+                eventElement.className = `event-card bg-white overflow-hidden shadow rounded-lg event-${event.category}`;
+                
+                eventElement.innerHTML = `
+                    <div class="px-4 py-5 sm:p-6">
+                        ${event.image ? `
+                            <div class="mb-4 overflow-hidden rounded-lg">
+                                <img src="${event.image}" alt="Event image for ${event.name}" class="w-full h-48 object-cover">
+                            </div>
+                        ` : `
+                            <div class="mb-4 bg-gray-200 rounded-lg flex items-center justify-center h-48">
+                                <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        `}
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">${event.name}</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            <span class="font-medium">Organized by:</span> ${event.club}
+                        </p>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            ${eventDate.toLocaleString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                            ${event.location}
+                        </div>
+                        <div class="mt-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                event.category === 'tech' ? 'bg-blue-100 text-blue-800' :
+                                event.category === 'cultural' ? 'bg-pink-100 text-pink-800' :
+                                event.category === 'sports' ? 'bg-green-100 text-green-800' :
+                                event.category === 'academic' ? 'bg-yellow-100 text-yellow-800' :
+                                                               'bg-purple-100 text-purple-800'
+                            }">
+                                ${event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                            </span>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">${event.description}</p>
+                        ${event.registrationRequired && event.registrationLink ? `
+                            <div class="mt-4">
+                                <a href="${event.registrationLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Register Now
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                eventsContainer.appendChild(eventElement);
+            });
+        }
+
+        // Sample data for first-time users
+        function initializeSampleEvents() {
+            if (!localStorage.getItem('collegeEvents')) {
+                const sampleEvents = [
+                    {
+                        id: 1,
+                        name: "Tech Symposium 2023",
+                        club: "Computer Science Club",
+                        date: "2023-12-15T10:00",
+                        location: "Main Auditorium",
+                        category: "tech",
+                        description: "Annual technology symposium featuring talks on AI, blockchain, and cybersecurity from industry leaders.",
+                        registrationRequired: true,
+                        registrationLink: "https://example.com/tech-symposium",
+                        image: "https://placehold.co/600x300?text=Tech+Symposium",
+                        createdAt: "2023-11-01T09:00:00Z"
+                    },
+                    {
+                        id: 2,
+                        name: "Cultural Fest",
+                        club: "Arts & Culture Society",
+                        date: "2023-12-20T16:00",
+                        location: "College Quad",
+                        category: "cultural",
+                        description: "Celebrating the diverse cultures of our college community with food, music, and performances.",
+                        registrationRequired: false,
+                        registrationLink: null,
+                        image: "https://placehold.co/600x300?text=Cultural+Fest",
+                        createdAt: "2023-11-05T14:30:00Z"
+                    }
+                ];
+                
+                localStorage.setItem('collegeEvents', JSON.stringify(sampleEvents));
+            }
+        }
+
+        // Initialize sample events if none exist
+        initializeSampleEvents();
+    </script>
+</body>
+</html>
